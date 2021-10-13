@@ -292,22 +292,12 @@ impl<'tcx> Visitor<'tcx> for PrintVisitor {
                 let lit_pat = self.next("lit");
                 println!("Lit(ref {}) = {};", lit_pat, current);
                 match lit.node {
-                    LitKind::Bool(val) => {
-                        println!("    if let LitKind::Bool({:?}) = {}.node;", val, lit_pat)
-                    },
-                    LitKind::Char(c) => {
-                        println!("    if let LitKind::Char({:?}) = {}.node;", c, lit_pat)
-                    },
-                    LitKind::Err(val) => {
-                        println!("    if let LitKind::Err({}) = {}.node;", val, lit_pat)
-                    },
-                    LitKind::Byte(b) => {
-                        println!("    if let LitKind::Byte({}) = {}.node;", b, lit_pat)
-                    },
+                    LitKind::Bool(val) => println!("    if let LitKind::Bool({:?}) = {}.node;", val, lit_pat),
+                    LitKind::Char(c) => println!("    if let LitKind::Char({:?}) = {}.node;", c, lit_pat),
+                    LitKind::Err(val) => println!("    if let LitKind::Err({}) = {}.node;", val, lit_pat),
+                    LitKind::Byte(b) => println!("    if let LitKind::Byte({}) = {}.node;", b, lit_pat),
                     // FIXME: also check int type
-                    LitKind::Int(i, _) => {
-                        println!("    if let LitKind::Int({}, _) = {}.node;", i, lit_pat)
-                    },
+                    LitKind::Int(i, _) => println!("    if let LitKind::Int({}, _) = {}.node;", i, lit_pat),
                     LitKind::Float(_, LitFloatType::Suffixed(_)) => println!(
                         "    if let LitKind::Float(_, LitFloatType::Suffixed(_)) = {}.node;",
                         lit_pat
