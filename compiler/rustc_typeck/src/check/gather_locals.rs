@@ -78,6 +78,34 @@ impl<'a, 'tcx> Visitor<'tcx> for GatherLocalsVisitor<'a, 'tcx> {
         intravisit::walk_local(self, local);
     }
 
+    fn visit_let_expr(&mut self, let_expr: &'tcx hir::LetExpr<'tcx>) {
+        let local_ty = match let_expr.ty {
+            Some(ref ty) => {
+                let o_ty = self.fcx.to_ty(&ty);
+
+                let c_ty = self.fcx.inh.infcx.canonicalize_user_type_annotation(UserType::Ty(o_ty));
+                debug!("visit_let_expr: ty.hir_id={:?} o_ty={:?} c_ty={:?}", ty.hir_id, o_ty, c_ty);
+                self.fcx
+                    .typeck_results
+                    .borrow_mut()
+                    .user_provided_types_mut()
+                    .insert(ty.hir_id, c_ty);
+
+                Some(LocalTy { decl_ty: o_ty, revealed_ty: o_ty })
+            }
+            None => None,
+        };
+        self.assign(let_expr.span, let_expr.hir_id, local_ty);
+
+        debug!(
+            "local variable {:?} is assigned type {}",
+            let_expr.pat,
+            self.fcx
+                .ty_to_string(&*self.fcx.locals.borrow().get(&let_expr.hir_id).unwrap().decl_ty)
+        );
+        intravisit::walk_let_expr(self, let_expr);
+    }
+
     fn visit_param(&mut self, param: &'tcx hir::Param<'tcx>) {
         let old_outermost_fn_param_pat = self.outermost_fn_param_pat.replace(param.ty_span);
         intravisit::walk_param(self, param);
