@@ -300,7 +300,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
             }
             ExprKind::Ret(ref expr_opt) => self.check_expr_return(expr_opt.as_deref(), expr),
-            ExprKind::Let(pat, let_expr, _) => self.check_expr_let(let_expr, pat),
+            ExprKind::Let(let_expr) => self.check_expr_let(let_expr),
             ExprKind::Loop(body, _, source, _) => {
                 self.check_expr_loop(body, source, expected, expr)
             }
@@ -1048,10 +1048,28 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
-    fn check_expr_let(&self, expr: &'tcx hir::Expr<'tcx>, pat: &'tcx hir::Pat<'tcx>) -> Ty<'tcx> {
-        self.warn_if_unreachable(expr.hir_id, expr.span, "block in `let` expression");
-        let expr_ty = self.demand_scrutinee_type(expr, pat.contains_explicit_ref_binding(), false);
-        self.check_pat_top(pat, expr_ty, Some(expr.span), true);
+    fn check_expr_let(&self, let_expr: &'tcx hir::LetExpr<'tcx>) -> Ty<'tcx> {
+        // overall similar operation to check_decl_local
+        let ty = self.local_ty(let_expr.span, let_expr.hir_id).decl_ty;
+        self.write_ty(let_expr.hir_id, ty);
+
+        let hir::LetExpr { pat, scrutinee, ty: explicit_ty, .. } = let_expr;
+
+        self.warn_if_unreachable(scrutinee.hir_id, scrutinee.span, "block in `let` expression");
+        let expr_ty = self.demand_scrutinee_type(
+            scrutinee,
+            pat.contains_explicit_ref_binding(),
+            false,
+            Some(ty),
+        );
+
+        // Does the expected pattern type originate from an expression and what is the span?
+        let (origin_expr, ty_span) = match explicit_ty {
+            Some(ty) => (false, Some(ty.span)), // Bias towards the explicit user type.
+            _ => (true, Some(scrutinee.span)),  // No explicit type; so use the scrutinee.
+        };
+
+        self.check_pat_top(pat, expr_ty, ty_span, origin_expr);
         self.tcx.types.bool
     }
 

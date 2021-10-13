@@ -25,7 +25,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let tcx = self.tcx;
 
         let acrb = arms_contain_ref_bindings(arms);
-        let scrutinee_ty = self.demand_scrutinee_type(scrut, acrb, arms.is_empty());
+        let scrutinee_ty = self.demand_scrutinee_type(scrut, acrb, arms.is_empty(), None);
         debug!(?scrutinee_ty);
 
         // If there are no arms, that is a diverging match; a special case.
@@ -87,6 +87,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             e,
                             pat.contains_explicit_ref_binding(),
                             false,
+                            None,
                         );
                         self.check_pat_top(&pat, scrutinee_ty, None, true);
                     }
@@ -413,6 +414,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         scrut: &'tcx hir::Expr<'tcx>,
         contains_ref_bindings: Option<hir::Mutability>,
         no_arms: bool,
+        type_annotation: Option<Ty<'tcx>>,
     ) -> Ty<'tcx> {
         // Not entirely obvious: if matches may create ref bindings, we want to
         // use the *precise* type of the scrutinee, *not* some supertype, as
@@ -474,12 +476,16 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // ...but otherwise we want to use any supertype of the
             // scrutinee. This is sort of a workaround, see note (*) in
             // `check_pat` for some details.
-            let scrut_ty = self.next_ty_var(TypeVariableOrigin {
-                kind: TypeVariableOriginKind::TypeInference,
-                span: scrut.span,
-            });
-            self.check_expr_has_type_or_error(scrut, scrut_ty, |_| {});
-            scrut_ty
+            let expected_ty = if let Some(explicit) = type_annotation {
+                explicit
+            } else {
+                self.next_ty_var(TypeVariableOrigin {
+                    kind: TypeVariableOriginKind::TypeInference,
+                    span: scrut.span,
+                })
+            };
+            self.check_expr_has_type_or_error(scrut, expected_ty, |_| {});
+            expected_ty
         }
     }
 
