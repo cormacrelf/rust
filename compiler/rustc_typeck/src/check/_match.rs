@@ -469,7 +469,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         //
         // See #44848.
         if let Some(m) = contains_ref_bindings {
-            self.check_expr_with_needs(scrut, Needs::maybe_mut_place(m))
+            let expectation = match type_annotation {
+                Some(explicit) => Expectation::ExpectHasType(explicit),
+                None => Expectation::NoExpectation,
+            };
+            self.check_expr_with_expectation_and_needs(
+                scrut,
+                expectation,
+                Needs::maybe_mut_place(m),
+            )
         } else if no_arms {
             self.check_expr(scrut)
         } else {
