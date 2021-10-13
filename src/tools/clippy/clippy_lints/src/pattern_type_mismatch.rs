@@ -1,6 +1,7 @@
 use clippy_utils::diagnostics::span_lint_and_help;
 use rustc_hir::{
     intravisit, Body, Expr, ExprKind, FnDecl, HirId, LocalSource, Mutability, Pat, PatKind, Stmt, StmtKind,
+    LetExpr,
 };
 use rustc_lint::{LateContext, LateLintPass, LintContext};
 use rustc_middle::lint::in_external_macro;
@@ -104,8 +105,8 @@ impl<'tcx> LateLintPass<'tcx> for PatternTypeMismatch {
                 }
             }
         }
-        if let ExprKind::Let(let_pat, ..) = expr.kind {
-            apply_lint(cx, let_pat, DerefPossible::Possible);
+        if let ExprKind::Let(LetExpr { pat, .. }) = expr.kind {
+            apply_lint(cx, pat, DerefPossible::Possible);
         }
     }
 
@@ -142,7 +143,8 @@ fn apply_lint<'tcx>(cx: &LateContext<'tcx>, pat: &Pat<'_>, deref_possible: Deref
             &format!(
                 "{}explicitly match against a `{}` pattern and adjust the enclosed variable bindings",
                 match (deref_possible, level) {
-                    (DerefPossible::Possible, Level::Top) => "use `*` to dereference the match expression or ",
+                    (DerefPossible::Possible, Level::Top) =>
+                        "use `*` to dereference the match expression or ",
                     _ => "",
                 },
                 match mutability {
