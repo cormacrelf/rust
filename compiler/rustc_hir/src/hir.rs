@@ -1135,7 +1135,7 @@ pub struct Let<'hir> {
     pub span: Span,
     pub pat: &'hir Pat<'hir>,
     pub ty: Option<&'hir Ty<'hir>>,
-    pub expr: &'hir Expr<'hir>,
+    pub init: &'hir Expr<'hir>,
 }
 
 #[derive(Debug, HashStable_Generic)]

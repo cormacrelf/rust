@@ -68,7 +68,7 @@ impl<'tcx> LateLintPass<'tcx> for PatternEquality {
         if_chain! {
             if let ExprKind::Let(let_expr) = expr.kind;
             if unary_pattern(let_expr.pat);
-            let exp_ty = cx.typeck_results().expr_ty(let_expr.expr);
+            let exp_ty = cx.typeck_results().expr_ty(let_expr.init);
             let pat_ty = cx.typeck_results().pat_ty(let_expr.pat);
             if is_structural_partial_eq(cx, exp_ty, pat_ty);
             then {
@@ -89,7 +89,7 @@ impl<'tcx> LateLintPass<'tcx> for PatternEquality {
                     "try",
                     format!(
                         "{} == {}",
-                        snippet_with_applicability(cx, let_expr.expr.span, "..", &mut applicability),
+                        snippet_with_applicability(cx, let_expr.init.span, "..", &mut applicability),
                         pat_str,
                     ),
                     applicability,
