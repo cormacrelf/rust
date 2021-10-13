@@ -142,12 +142,9 @@ fn print_expr(cx: &LateContext<'_>, expr: &hir::Expr<'_>, indent: usize) {
                 print_expr(cx, arg, indent + 1);
             }
         },
-        hir::ExprKind::Let(hir::Let { pat, ty, expr, .. }) => {
+        hir::ExprKind::Let(hir::Let { pat, init, .. }) => {
             print_pat(cx, pat, indent + 1);
-            if let Some(ty) = ty {
-                print_ty(cx, ty, indent + 1);
-            }
-            print_expr(cx, expr, indent + 1);
+            print_expr(cx, init, indent + 1);
         },
         hir::ExprKind::MethodCall(path, _, args, _) => {
             println!("{}MethodCall", ind);

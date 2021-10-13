@@ -208,7 +208,7 @@ impl<'tcx> Visitor<'tcx> for PrintVisitor {
         print!("    if let ExprKind::");
         let current = format!("{}.kind", self.current);
         match expr.kind {
-            ExprKind::Let(hir::Let { pat, ty, expr, .. }) => {
+            ExprKind::Let(hir::Let { pat, ty, init, .. }) => {
                 let let_pat = self.next("pat");
                 let let_ty = self.next("ty");
                 let let_expr = self.next("expr");
@@ -223,7 +223,7 @@ impl<'tcx> Visitor<'tcx> for PrintVisitor {
                     self.visit_ty(ty);
                 }
                 self.current = let_expr;
-                self.visit_expr(expr);
+                self.visit_expr(init);
             },
             ExprKind::Box(inner) => {
                 let inner_pat = self.next("inner");

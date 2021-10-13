@@ -606,7 +606,7 @@ impl<'tcx> Cx<'tcx> {
                 Err(err) => bug!("invalid loop id for continue: {}", err),
             },
             hir::ExprKind::Let(let_expr) => ExprKind::Let {
-                expr: self.mirror_expr(let_expr.expr),
+                expr: self.mirror_expr(let_expr.init),
                 pat: self.pattern_from_hir(let_expr.pat),
             },
             hir::ExprKind::If(cond, then, else_opt) => ExprKind::If {
