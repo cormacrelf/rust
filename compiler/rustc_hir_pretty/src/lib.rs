@@ -1466,8 +1466,8 @@ impl<'a> State<'a> {
                 // Print `}`:
                 self.bclose_maybe_open(expr.span, true);
             }
-            hir::ExprKind::Let(hir::LetExpr { pat, ty, scrutinee, .. }) => {
-                self.print_let(pat, *ty, scrutinee);
+            hir::ExprKind::Let(hir::LetExpr { pat, ty, expr, .. }) => {
+                self.print_let(pat, *ty, expr);
             }
             hir::ExprKind::If(ref test, ref blk, ref elseopt) => {
                 self.print_if(&test, &blk, elseopt.as_ref().map(|e| &**e));

@@ -233,7 +233,7 @@ impl HirEqInterExpr<'_, '_, '_> {
                 self.eq_expr(lc, rc) && self.eq_expr(&**lt, &**rt) && both(le, re, |l, r| self.eq_expr(l, r))
             },
             (&ExprKind::Let(l), &ExprKind::Let(r)) => {
-                self.eq_pat(l.pat, r.pat) && self.eq_opt_ty(l.ty, r.ty) && self.eq_expr(l.scrutinee, r.scrutinee)
+                self.eq_pat(l.pat, r.pat) && self.eq_opt_ty(l.ty, r.ty) && self.eq_expr(l.expr, r.expr)
             },
             (&ExprKind::Lit(ref l), &ExprKind::Lit(ref r)) => l.node == r.node,
             (&ExprKind::Loop(lb, ref ll, ref lls, _), &ExprKind::Loop(rb, ref rl, ref rls, _)) => {
@@ -676,8 +676,8 @@ impl<'a, 'tcx> SpanlessHash<'a, 'tcx> {
                     }
                 }
             },
-            ExprKind::Let(LetExpr { pat, scrutinee, ty, .. }) => {
-                self.hash_expr(scrutinee);
+            ExprKind::Let(LetExpr { pat, expr, ty, .. }) => {
+                self.hash_expr(expr);
                 if let Some(ty) = ty {
                     self.hash_ty(ty);
                 }

@@ -1130,11 +1130,11 @@ pub fn walk_anon_const<'v, V: Visitor<'v>>(visitor: &mut V, constant: &'v AnonCo
 }
 
 pub fn walk_let_expr<'v, V: Visitor<'v>>(visitor: &mut V, let_expression: &'v LetExpr<'v>) {
-    let LetExpr { hir_id, span: _, pat, ty: ty_opt, scrutinee: init } = let_expression;
+    let LetExpr { hir_id, span: _, pat, ty: ty_opt, expr } = let_expression;
     visitor.visit_id(*hir_id);
     visitor.visit_pat(pat);
     walk_list!(visitor, visit_ty, ty_opt);
-    visitor.visit_expr(init);
+    visitor.visit_expr(expr);
 }
 
 pub fn walk_expr<'v, V: Visitor<'v>>(visitor: &mut V, expression: &'v Expr<'v>) {

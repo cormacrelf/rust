@@ -1053,7 +1053,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let ty = self.local_ty(let_expr.span, let_expr.hir_id).decl_ty;
         self.write_ty(let_expr.hir_id, ty);
 
-        let hir::LetExpr { pat, scrutinee, ty: explicit_ty, .. } = let_expr;
+        let hir::LetExpr { pat, expr: scrutinee, ty: explicit_ty, .. } = let_expr;
 
         self.warn_if_unreachable(scrutinee.hir_id, scrutinee.span, "block in `let` expression");
         let expr_ty = self.demand_scrutinee_type(

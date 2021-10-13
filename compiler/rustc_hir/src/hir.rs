@@ -1182,7 +1182,7 @@ pub struct LetExpr<'hir> {
     pub span: Span,
     pub pat: &'hir Pat<'hir>,
     pub ty: Option<&'hir Ty<'hir>>,
-    pub scrutinee: &'hir Expr<'hir>,
+    pub expr: &'hir Expr<'hir>,
 }
 
 #[derive(Debug, HashStable_Generic)]
