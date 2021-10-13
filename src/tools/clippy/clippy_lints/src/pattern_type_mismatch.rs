@@ -1,8 +1,8 @@
 use clippy_utils::diagnostics::span_lint_and_help;
 use clippy_utils::last_path_segment;
 use rustc_hir::{
-    intravisit, Body, Expr, ExprKind, FnDecl, HirId, LetExpr, LocalSource, MatchSource, Mutability,
-    Pat, PatField, PatKind, QPath, Stmt, StmtKind,
+    intravisit, Body, Expr, ExprKind, FnDecl, HirId, LetExpr, LocalSource, MatchSource, Mutability, Pat, PatField,
+    PatKind, QPath, Stmt, StmtKind,
 };
 use rustc_lint::{LateContext, LateLintPass, LintContext};
 use rustc_middle::lint::in_external_macro;
@@ -150,12 +150,7 @@ enum DerefPossible {
     Impossible,
 }
 
-fn apply_lint<'tcx>(
-    cx: &LateContext<'tcx>,
-    pat: &Pat<'_>,
-    expr_ty: Ty<'tcx>,
-    deref_possible: DerefPossible,
-) -> bool {
+fn apply_lint<'tcx>(cx: &LateContext<'tcx>, pat: &Pat<'_>, expr_ty: Ty<'tcx>, deref_possible: DerefPossible) -> bool {
     let maybe_mismatch = find_first_mismatch(cx, pat, expr_ty, Level::Top);
     if let Some((span, mutability, level)) = maybe_mismatch {
         span_lint_and_help(
@@ -167,8 +162,7 @@ fn apply_lint<'tcx>(
             &format!(
                 "{}explicitly match against a `{}` pattern and adjust the enclosed variable bindings",
                 match (deref_possible, level) {
-                    (DerefPossible::Possible, Level::Top) =>
-                        "use `*` to dereference the match expression or ",
+                    (DerefPossible::Possible, Level::Top) => "use `*` to dereference the match expression or ",
                     _ => "",
                 },
                 match mutability {
@@ -314,9 +308,7 @@ fn find_first_mismatch_in_struct<'tcx>(
 
 fn is_non_ref_pattern(pat_kind: &PatKind<'_>) -> bool {
     match pat_kind {
-        PatKind::Struct(..) | PatKind::Tuple(..) | PatKind::TupleStruct(..) | PatKind::Path(..) => {
-            true
-        }
+        PatKind::Struct(..) | PatKind::Tuple(..) | PatKind::TupleStruct(..) | PatKind::Path(..) => true,
         PatKind::Or(sub_pats) => sub_pats.iter().any(|pat| is_non_ref_pattern(&pat.kind)),
         _ => false,
     }
