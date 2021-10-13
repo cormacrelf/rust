@@ -134,7 +134,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         let local_hir_id = self.lower_node_id(local.id);
         self.lower_attrs(local_hir_id, &local.attrs);
         let let_expr = {
-            let lex = self.arena.alloc(hir::LetExpr {
+            let lex = self.arena.alloc(hir::Let {
                 hir_id: local_hir_id,
                 pat: self.lower_pat(&local.pat),
                 ty,

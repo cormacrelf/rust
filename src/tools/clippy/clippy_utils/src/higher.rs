@@ -99,7 +99,7 @@ impl<'hir> IfLet<'hir> {
         if let ExprKind::If(
             Expr {
                 kind:
-                    ExprKind::Let(hir::LetExpr {
+                    ExprKind::Let(hir::Let {
                         pat: let_pat,
                         expr: let_expr,
                         ..
@@ -371,7 +371,7 @@ impl<'hir> WhileLet<'hir> {
                             ExprKind::If(
                                 Expr {
                                     kind:
-                                        ExprKind::Let(hir::LetExpr {
+                                        ExprKind::Let(hir::Let {
                                             pat: let_pat,
                                             expr: let_expr,
                                             ..
