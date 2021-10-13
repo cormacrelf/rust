@@ -3,7 +3,7 @@ use clippy_utils::source::snippet_with_applicability;
 use clippy_utils::ty::implements_trait;
 use if_chain::if_chain;
 use rustc_errors::Applicability;
-use rustc_hir::{Expr, ExprKind, Let, Pat, PatKind};
+use rustc_hir::{Expr, ExprKind, Pat, PatKind};
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_middle::ty::Ty;
 use rustc_session::{declare_lint_pass, declare_tool_lint};
@@ -66,20 +66,20 @@ fn is_structural_partial_eq(cx: &LateContext<'tcx>, ty: Ty<'tcx>, other: Ty<'tcx
 impl<'tcx> LateLintPass<'tcx> for PatternEquality {
     fn check_expr(&mut self, cx: &LateContext<'tcx>, expr: &'tcx Expr<'tcx>) {
         if_chain! {
-            if let ExprKind::Let(Let { pat, expr, .. }) = expr.kind;
-            if unary_pattern(pat);
-            let exp_ty = cx.typeck_results().expr_ty(expr);
-            let pat_ty = cx.typeck_results().pat_ty(pat);
+            if let ExprKind::Let(let_expr) = expr.kind;
+            if unary_pattern(let_expr.pat);
+            let exp_ty = cx.typeck_results().expr_ty(let_expr.expr);
+            let pat_ty = cx.typeck_results().pat_ty(let_expr.pat);
             if is_structural_partial_eq(cx, exp_ty, pat_ty);
             then {
 
                 let mut applicability = Applicability::MachineApplicable;
-                let pat_str = match pat.kind {
+                let pat_str = match let_expr.pat.kind {
                     PatKind::Struct(..) => format!(
                         "({})",
-                        snippet_with_applicability(cx, pat.span, "..", &mut applicability),
+                        snippet_with_applicability(cx, let_expr.pat.span, "..", &mut applicability),
                     ),
-                    _ => snippet_with_applicability(cx, pat.span, "..", &mut applicability).to_string(),
+                    _ => snippet_with_applicability(cx, let_expr.pat.span, "..", &mut applicability).to_string(),
                 };
                 span_lint_and_sugg(
                     cx,
@@ -89,7 +89,7 @@ impl<'tcx> LateLintPass<'tcx> for PatternEquality {
                     "try",
                     format!(
                         "{} == {}",
-                        snippet_with_applicability(cx, expr.span, "..", &mut applicability),
+                        snippet_with_applicability(cx, let_expr.expr.span, "..", &mut applicability),
                         pat_str,
                     ),
                     applicability,
