@@ -1,7 +1,7 @@
 use clippy_utils::diagnostics::span_lint_and_help;
 use rustc_hir::{
-    intravisit, Body, Expr, ExprKind, FnDecl, HirId, LocalSource, Mutability, Pat, PatKind, Stmt, StmtKind,
-    LetExpr,
+    intravisit, Body, Expr, ExprKind, FnDecl, HirId, LetExpr, LocalSource, Mutability, Pat, PatKind, Stmt,
+    StmtKind,
 };
 use rustc_lint::{LateContext, LateLintPass, LintContext};
 use rustc_middle::lint::in_external_macro;
@@ -143,8 +143,7 @@ fn apply_lint<'tcx>(cx: &LateContext<'tcx>, pat: &Pat<'_>, deref_possible: Deref
             &format!(
                 "{}explicitly match against a `{}` pattern and adjust the enclosed variable bindings",
                 match (deref_possible, level) {
-                    (DerefPossible::Possible, Level::Top) =>
-                        "use `*` to dereference the match expression or ",
+                    (DerefPossible::Possible, Level::Top) => "use `*` to dereference the match expression or ",
                     _ => "",
                 },
                 match mutability {

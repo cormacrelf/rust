@@ -128,7 +128,7 @@ impl<'tcx> LateLintPass<'tcx> for Author {
     fn check_stmt(&mut self, cx: &LateContext<'tcx>, stmt: &'tcx hir::Stmt<'_>) {
         match stmt.kind {
             StmtKind::Expr(e) | StmtKind::Semi(e) if has_attr(cx, e.hir_id) => return,
-            _ => {}
+            _ => {},
         }
         check_node(cx, stmt.hir_id, |v| {
             v.stmt(&v.bind("stmt", stmt));
