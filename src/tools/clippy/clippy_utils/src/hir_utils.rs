@@ -8,7 +8,7 @@ use rustc_hir::HirIdMap;
 use rustc_hir::{
     BinOpKind, Block, BodyId, Expr, ExprField, ExprKind, FnRetTy, GenericArg, GenericArgs, Guard, HirId,
     InlineAsmOperand, Lifetime, LifetimeName, ParamName, Pat, PatField, PatKind, Path, PathSegment, QPath, Stmt,
-    StmtKind, Ty, TyKind, TypeBinding,
+    StmtKind, Ty, TyKind, TypeBinding, LetExpr,
 };
 use rustc_lexer::{tokenize, TokenKind};
 use rustc_lint::LateContext;
@@ -232,7 +232,7 @@ impl HirEqInterExpr<'_, '_, '_> {
             (&ExprKind::If(lc, lt, ref le), &ExprKind::If(rc, rt, ref re)) => {
                 self.eq_expr(lc, rc) && self.eq_expr(&**lt, &**rt) && both(le, re, |l, r| self.eq_expr(l, r))
             },
-            (&ExprKind::Let(lp, le, _), &ExprKind::Let(rp, re, _)) => self.eq_pat(lp, rp) && self.eq_expr(le, re),
+            (&ExprKind::Let(l), &ExprKind::Let(r)) => self.eq_pat(l.pat, r.pat) && self.eq_opt_ty(l.ty, r.ty) && self.eq_expr(l.scrutinee, r.scrutinee),
             (&ExprKind::Lit(ref l), &ExprKind::Lit(ref r)) => l.node == r.node,
             (&ExprKind::Loop(lb, ref ll, ref lls, _), &ExprKind::Loop(rb, ref rl, ref rls, _)) => {
                 lls == rls && self.eq_block(lb, rb) && both(ll, rl, |l, r| l.ident.name == r.ident.name)
@@ -401,6 +401,14 @@ impl HirEqInterExpr<'_, '_, '_> {
             (&TyKind::Infer, &TyKind::Infer) => true,
             _ => false,
         }
+    }
+
+    fn eq_opt_ty(&mut self, left: Option<&Ty<'_>>, right: Option<&Ty<'_>>) -> bool {
+      match (left, right) {
+        (Some(l), Some(r)) => self.eq_ty(l, r),
+        (None, None) => true,
+        _ => false,
+      }
     }
 
     fn eq_type_binding(&mut self, left: &TypeBinding<'_>, right: &TypeBinding<'_>) -> bool {
@@ -666,8 +674,11 @@ impl<'a, 'tcx> SpanlessHash<'a, 'tcx> {
                     }
                 }
             },
-            ExprKind::Let(pat, expr, _) => {
-                self.hash_expr(expr);
+            ExprKind::Let(LetExpr { pat, scrutinee, ty, .. }) => {
+                self.hash_expr(scrutinee);
+                if let Some(ty) = ty {
+                  self.hash_ty(ty);
+                }
                 self.hash_pat(pat);
             },
             ExprKind::LlvmInlineAsm(..) | ExprKind::Err => {},
