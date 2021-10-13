@@ -131,9 +131,11 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         let span = self.lower_span(local.span);
         let span = self.mark_span_with_reason(DesugaringKind::LetElse, span, None);
         let scrutinee = self.lower_expr(item);
+        let local_hir_id = self.lower_node_id(local.id);
+        self.lower_attrs(local_hir_id, &local.attrs);
         let let_expr = {
             let lex = self.arena.alloc(hir::LetExpr {
-                hir_id: self.next_id(),
+                hir_id: local_hir_id,
                 pat: self.lower_pat(&local.pat),
                 ty,
                 scrutinee,
@@ -150,6 +152,8 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             let block = self.lower_block(els, false);
             self.arena.alloc(self.expr_block(block, AttrVec::new()))
         };
+        self.alias_attrs(let_expr.hir_id, local_hir_id);
+        self.alias_attrs(else_expr.hir_id, local_hir_id);
         let if_expr = self.arena.alloc(hir::Expr {
             hir_id: stmt_hir_id,
             span,
