@@ -74,7 +74,7 @@ use rustc_hir::itemlikevisit::ItemLikeVisitor;
 use rustc_hir::LangItem::{OptionNone, ResultErr, ResultOk};
 use rustc_hir::{
     def, Arm, BindingAnnotation, Block, Body, Constness, Destination, Expr, ExprKind, FnDecl, ForeignItem, GenericArgs,
-    HirId, Impl, ImplItem, ImplItemKind, IsAsync, Item, ItemKind, LangItem, Let, Local, MatchSource, Mutability, Node,
+    HirId, Impl, ImplItem, ImplItemKind, IsAsync, Item, ItemKind, LangItem, Local, MatchSource, Mutability, Node,
     Param, Pat, PatKind, Path, PathSegment, PrimTy, QPath, Stmt, StmtKind, TraitItem, TraitItemKind, TraitRef, TyKind,
     UnOp,
 };
@@ -871,8 +871,8 @@ pub fn capture_local_usage(cx: &LateContext<'tcx>, e: &Expr<'_>) -> CaptureKind 
                         capture_expr_ty = e;
                     }
                 },
-                ExprKind::Let(Let { pat, .. }) => {
-                    let mutability = match pat_capture_kind(cx, pat) {
+                ExprKind::Let(let_expr) => {
+                    let mutability = match pat_capture_kind(cx, let_expr.pat) {
                         CaptureKind::Value => Mutability::Not,
                         CaptureKind::Ref(m) => m,
                     };

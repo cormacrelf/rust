@@ -229,8 +229,10 @@ impl<'a, 'tcx> ExprUseVisitor<'a, 'tcx> {
                 }
             }
 
-            hir::ExprKind::Let(hir::Let { pat, expr, .. }) => {
-                self.walk_local(expr, pat, |t| t.borrow_expr(expr, ty::ImmBorrow));
+            hir::ExprKind::Let(let_expr) => {
+                self.walk_local(let_expr.expr, let_expr.pat, |t| {
+                    t.borrow_expr(let_expr.expr, ty::ImmBorrow)
+                });
             }
 
             hir::ExprKind::Match(ref discr, arms, _) => {
