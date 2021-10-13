@@ -117,8 +117,8 @@ impl<'tcx> LateLintPass<'tcx> for PatternTypeMismatch {
                 }
             }
         }
-        if let ExprKind::Let(LetExpr { pat, scrutinee, .. }) = expr.kind {
-            if let Some(expr_ty) = cx.typeck_results().node_type_opt(scrutinee.hir_id) {
+        if let ExprKind::Let(LetExpr { pat, expr, .. }) = expr.kind {
+            if let Some(expr_ty) = cx.typeck_results().node_type_opt(expr.hir_id) {
                 if in_external_macro(cx.sess(), pat.span) {
                     return;
                 }
