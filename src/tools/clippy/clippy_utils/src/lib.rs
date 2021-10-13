@@ -706,9 +706,7 @@ pub fn is_default_equivalent(cx: &LateContext<'_>, e: &Expr<'_>) -> bool {
             }
         },
         ExprKind::Path(qpath) => is_lang_ctor(cx, qpath, OptionNone),
-        ExprKind::AddrOf(rustc_hir::BorrowKind::Ref, _, expr) => {
-            matches!(expr.kind, ExprKind::Array([]))
-        },
+        ExprKind::AddrOf(rustc_hir::BorrowKind::Ref, _, expr) => matches!(expr.kind, ExprKind::Array([])),
         _ => false,
     }
 }
@@ -1242,9 +1240,7 @@ pub fn get_enclosing_loop_or_closure(tcx: TyCtxt<'tcx>, expr: &Expr<'_>) -> Opti
                     kind: ExprKind::Loop(..) | ExprKind::Closure(..),
                     ..
                 },
-            ) => {
-                return Some(e);
-            },
+            ) => return Some(e),
             Node::Expr(_) | Node::Stmt(_) | Node::Block(_) | Node::Local(_) | Node::Arm(_) => (),
             _ => break,
         }
@@ -1788,9 +1784,7 @@ pub fn is_expr_identity_function(cx: &LateContext<'_>, expr: &Expr<'_>) -> bool 
                         }
                     }
                 },
-                _ => {
-                    return path_to_local_id(expr, id) && cx.typeck_results().expr_adjustments(expr).is_empty();
-                },
+                _ => return path_to_local_id(expr, id) && cx.typeck_results().expr_adjustments(expr).is_empty(),
             }
         }
     }
