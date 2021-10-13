@@ -64,8 +64,8 @@ impl<'tcx> Visitor<'tcx> for MatchVisitor<'_, '_, 'tcx> {
         intravisit::walk_expr(self, ex);
         match &ex.kind {
             hir::ExprKind::Match(scrut, arms, source) => self.check_match(scrut, arms, *source),
-            hir::ExprKind::Let(hir::LetExpr { pat, scrutinee, span, .. }) => {
-                self.check_let(pat, scrutinee, *span)
+            hir::ExprKind::Let(hir::LetExpr { pat, expr, span, .. }) => {
+                self.check_let(pat, expr, *span)
             }
             _ => {}
         }

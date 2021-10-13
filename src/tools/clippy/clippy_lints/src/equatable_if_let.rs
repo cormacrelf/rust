@@ -66,9 +66,9 @@ fn is_structural_partial_eq(cx: &LateContext<'tcx>, ty: Ty<'tcx>, other: Ty<'tcx
 impl<'tcx> LateLintPass<'tcx> for PatternEquality {
     fn check_expr(&mut self, cx: &LateContext<'tcx>, expr: &'tcx Expr<'tcx>) {
         if_chain! {
-            if let ExprKind::Let(LetExpr { pat, scrutinee: exp, .. }) = expr.kind;
+            if let ExprKind::Let(LetExpr { pat, expr, .. }) = expr.kind;
             if unary_pattern(pat);
-            let exp_ty = cx.typeck_results().expr_ty(exp);
+            let exp_ty = cx.typeck_results().expr_ty(expr);
             let pat_ty = cx.typeck_results().pat_ty(pat);
             if is_structural_partial_eq(cx, exp_ty, pat_ty);
             then {
@@ -89,7 +89,7 @@ impl<'tcx> LateLintPass<'tcx> for PatternEquality {
                     "try",
                     format!(
                         "{} == {}",
-                        snippet_with_applicability(cx, exp.span, "..", &mut applicability),
+                        snippet_with_applicability(cx, expr.span, "..", &mut applicability),
                         pat_str,
                     ),
                     applicability,
