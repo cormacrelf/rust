@@ -1160,9 +1160,10 @@ impl<'a> State<'a> {
 
     /// Print a `let pat = expr` expression.
     fn print_let(&mut self, pat: &hir::Pat<'_>, ty: Option<&hir::Ty<'_>>, expr: &hir::Expr<'_>) {
-        self.s.word("let ");
+        self.word_space("let");
         self.print_pat(pat);
         if let Some(ty) = ty {
+            self.word_space(":");
             self.print_type(ty);
         }
         self.s.space();
