@@ -384,7 +384,7 @@ impl<'a, 'tcx> PrintVisitor<'a, 'tcx> {
                     out!("if let TyKind::Path(ref {qpath}) = {let_expr}.ty.kind;");
                     self.qpath(qpath);
                 }
-                self.expr(field!(let_expr.expr));
+                self.expr(field!(let_expr.init));
             }
             ExprKind::Box(inner) => {
                 bind!(self, inner);

@@ -98,7 +98,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         span: self.lower_span(span),
                         pat: self.lower_pat(pat),
                         ty: None,
-                        expr: self.lower_expr(scrutinee),
+                        init: self.lower_expr(scrutinee),
                     }))
                 }
                 ExprKind::If(ref cond, ref then, ref else_opt) => {

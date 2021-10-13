@@ -120,7 +120,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         &mut self,
         stmt_hir_id: hir::HirId,
         local: &Local,
-        expr: &Expr,
+        init: &Expr,
         els: &Block,
         tail: &[Stmt],
     ) -> &'hir hir::Expr<'hir> {
@@ -130,7 +130,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             .map(|t| self.lower_ty(t, ImplTraitContext::Disallowed(ImplTraitPosition::Binding)));
         let span = self.lower_span(local.span);
         let span = self.mark_span_with_reason(DesugaringKind::LetElse, span, None);
-        let expr = self.lower_expr(expr);
+        let init = self.lower_expr(init);
         let local_hir_id = self.lower_node_id(local.id);
         self.lower_attrs(local_hir_id, &local.attrs);
         let let_expr = {
@@ -138,7 +138,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                 hir_id: local_hir_id,
                 pat: self.lower_pat(&local.pat),
                 ty,
-                expr,
+                init,
                 span,
             });
             self.arena.alloc(self.expr(span, hir::ExprKind::Let(lex), AttrVec::new()))

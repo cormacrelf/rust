@@ -1131,7 +1131,7 @@ pub fn walk_anon_const<'v, V: Visitor<'v>>(visitor: &mut V, constant: &'v AnonCo
 
 pub fn walk_let_expr<'v, V: Visitor<'v>>(visitor: &mut V, let_expr: &'v Let<'v>) {
     // match the visit order in walk_local
-    visitor.visit_expr(let_expr.expr);
+    visitor.visit_expr(let_expr.init);
     visitor.visit_id(let_expr.hir_id);
     visitor.visit_pat(let_expr.pat);
     walk_list!(visitor, visit_ty, let_expr.ty);
