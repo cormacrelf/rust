@@ -233,7 +233,7 @@ impl HirEqInterExpr<'_, '_, '_> {
                 self.eq_expr(lc, rc) && self.eq_expr(&**lt, &**rt) && both(le, re, |l, r| self.eq_expr(l, r))
             },
             (&ExprKind::Let(l), &ExprKind::Let(r)) => {
-                self.eq_pat(l.pat, r.pat) && self.eq_opt_ty(l.ty, r.ty) && self.eq_expr(l.expr, r.expr)
+                self.eq_pat(l.pat, r.pat) && both(&l.ty, &r.ty, |l, r| self.eq_ty(l, r)) && self.eq_expr(l.expr, r.expr)
             },
             (&ExprKind::Lit(ref l), &ExprKind::Lit(ref r)) => l.node == r.node,
             (&ExprKind::Loop(lb, ref ll, ref lls, _), &ExprKind::Loop(rb, ref rl, ref rls, _)) => {
@@ -401,14 +401,6 @@ impl HirEqInterExpr<'_, '_, '_> {
             (&TyKind::Path(ref l), &TyKind::Path(ref r)) => self.eq_qpath(l, r),
             (&TyKind::Tup(l), &TyKind::Tup(r)) => over(l, r, |l, r| self.eq_ty(l, r)),
             (&TyKind::Infer, &TyKind::Infer) => true,
-            _ => false,
-        }
-    }
-
-    fn eq_opt_ty(&mut self, left: Option<&Ty<'_>>, right: Option<&Ty<'_>>) -> bool {
-        match (left, right) {
-            (Some(l), Some(r)) => self.eq_ty(l, r),
-            (None, None) => true,
             _ => false,
         }
     }
