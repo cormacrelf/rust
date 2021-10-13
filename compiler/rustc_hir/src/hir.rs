@@ -1177,7 +1177,7 @@ pub struct Arm<'hir> {
 }
 
 #[derive(Debug, HashStable_Generic)]
-pub struct LetExpr<'hir> {
+pub struct Let<'hir> {
     pub hir_id: HirId,
     pub span: Span,
     pub pat: &'hir Pat<'hir>,
@@ -1705,7 +1705,7 @@ pub enum ExprKind<'hir> {
     ///
     /// These are not `Local` and only occur as expressions.
     /// The `let Some(x) = foo()` in `if let Some(x) = foo()` is an example of `Let(..)`.
-    Let(&'hir LetExpr<'hir>),
+    Let(&'hir Let<'hir>),
     /// An `if` block, with an optional else block.
     ///
     /// I.e., `if <expr> { <expr> } else { <expr> }`.

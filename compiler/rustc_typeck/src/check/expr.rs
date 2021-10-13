@@ -1048,12 +1048,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
-    fn check_expr_let(&self, let_expr: &'tcx hir::LetExpr<'tcx>) -> Ty<'tcx> {
+    fn check_expr_let(&self, let_expr: &'tcx hir::Let<'tcx>) -> Ty<'tcx> {
         // overall similar operation to check_decl_local
         let ty = self.local_ty(let_expr.span, let_expr.hir_id).decl_ty;
         self.write_ty(let_expr.hir_id, ty);
 
-        let hir::LetExpr { pat, expr: scrutinee, ty: explicit_ty, .. } = let_expr;
+        let hir::Let { pat, expr: scrutinee, ty: explicit_ty, .. } = let_expr;
 
         self.warn_if_unreachable(scrutinee.hir_id, scrutinee.span, "block in `let` expression");
         let expr_ty = self.demand_scrutinee_type(

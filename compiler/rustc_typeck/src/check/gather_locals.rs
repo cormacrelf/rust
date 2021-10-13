@@ -78,7 +78,7 @@ impl<'a, 'tcx> Visitor<'tcx> for GatherLocalsVisitor<'a, 'tcx> {
         intravisit::walk_local(self, local);
     }
 
-    fn visit_let_expr(&mut self, let_expr: &'tcx hir::LetExpr<'tcx>) {
+    fn visit_let_expr(&mut self, let_expr: &'tcx hir::Let<'tcx>) {
         let local_ty = match let_expr.ty {
             Some(ref ty) => {
                 let o_ty = self.fcx.to_ty(&ty);

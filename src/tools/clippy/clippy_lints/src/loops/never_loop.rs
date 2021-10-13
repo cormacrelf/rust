@@ -4,7 +4,7 @@ use clippy_utils::diagnostics::span_lint_and_then;
 use clippy_utils::higher::ForLoop;
 use clippy_utils::source::snippet;
 use rustc_errors::Applicability;
-use rustc_hir::{Block, Expr, ExprKind, HirId, InlineAsmOperand, LetExpr, Pat, Stmt, StmtKind};
+use rustc_hir::{Block, Expr, ExprKind, HirId, InlineAsmOperand, Let, Pat, Stmt, StmtKind};
 use rustc_lint::LateContext;
 use rustc_span::Span;
 use std::iter::{once, Iterator};
@@ -122,7 +122,7 @@ fn never_loop_expr(expr: &Expr<'_>, main_loop_id: HirId) -> NeverLoopResult {
         | ExprKind::Struct(_, _, Some(e))
         | ExprKind::Repeat(e, _)
         | ExprKind::DropTemps(e) => never_loop_expr(e, main_loop_id),
-        ExprKind::Let(LetExpr { expr, .. }) => never_loop_expr(expr, main_loop_id),
+        ExprKind::Let(Let { expr, .. }) => never_loop_expr(expr, main_loop_id),
         ExprKind::Array(es) | ExprKind::MethodCall(_, _, es, _) | ExprKind::Tup(es) => {
             never_loop_expr_all(&mut es.iter(), main_loop_id)
         },

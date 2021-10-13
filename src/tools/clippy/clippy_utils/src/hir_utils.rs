@@ -7,8 +7,8 @@ use rustc_hir::def::Res;
 use rustc_hir::HirIdMap;
 use rustc_hir::{
     BinOpKind, Block, BodyId, Expr, ExprField, ExprKind, FnRetTy, GenericArg, GenericArgs, Guard, HirId,
-    InlineAsmOperand, LetExpr, Lifetime, LifetimeName, ParamName, Pat, PatField, PatKind, Path, PathSegment, QPath,
-    Stmt, StmtKind, Ty, TyKind, TypeBinding,
+    InlineAsmOperand, Let, Lifetime, LifetimeName, ParamName, Pat, PatField, PatKind, Path, PathSegment, QPath, Stmt,
+    StmtKind, Ty, TyKind, TypeBinding,
 };
 use rustc_lexer::{tokenize, TokenKind};
 use rustc_lint::LateContext;
@@ -676,7 +676,7 @@ impl<'a, 'tcx> SpanlessHash<'a, 'tcx> {
                     }
                 }
             },
-            ExprKind::Let(LetExpr { pat, expr, ty, .. }) => {
+            ExprKind::Let(Let { pat, expr, ty, .. }) => {
                 self.hash_expr(expr);
                 if let Some(ty) = ty {
                     self.hash_ty(ty);

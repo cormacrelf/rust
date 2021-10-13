@@ -389,7 +389,7 @@ pub trait Visitor<'v>: Sized {
     fn visit_expr(&mut self, ex: &'v Expr<'v>) {
         walk_expr(self, ex)
     }
-    fn visit_let_expr(&mut self, lex: &'v LetExpr<'v>) {
+    fn visit_let_expr(&mut self, lex: &'v Let<'v>) {
         walk_let_expr(self, lex)
     }
     fn visit_ty(&mut self, t: &'v Ty<'v>) {
@@ -1129,8 +1129,8 @@ pub fn walk_anon_const<'v, V: Visitor<'v>>(visitor: &mut V, constant: &'v AnonCo
     visitor.visit_nested_body(constant.body);
 }
 
-pub fn walk_let_expr<'v, V: Visitor<'v>>(visitor: &mut V, let_expression: &'v LetExpr<'v>) {
-    let LetExpr { hir_id, span: _, pat, ty: ty_opt, expr } = let_expression;
+pub fn walk_let_expr<'v, V: Visitor<'v>>(visitor: &mut V, let_expression: &'v Let<'v>) {
+    let Let { hir_id, span: _, pat, ty: ty_opt, expr } = let_expression;
     visitor.visit_id(*hir_id);
     visitor.visit_pat(pat);
     walk_list!(visitor, visit_ty, ty_opt);
