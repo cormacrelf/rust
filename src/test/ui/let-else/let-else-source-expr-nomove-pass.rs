@@ -3,7 +3,7 @@
 
 #![feature(let_else)]
 
-fn example_if_let(value: Option<String>) {
+fn example_let_else(value: Option<String>) {
     let Some(inner) = value else {
         println!("other: {:?}", value); // OK
         return;
@@ -12,6 +12,6 @@ fn example_if_let(value: Option<String>) {
 }
 
 fn main() {
-    example_if_let(Some("foo".into()));
-    example_if_let(None);
+    example_let_else(Some("foo".into()));
+    example_let_else(None);
 }
