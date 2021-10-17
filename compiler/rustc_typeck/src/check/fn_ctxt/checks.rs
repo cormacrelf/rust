@@ -1,5 +1,6 @@
 use crate::astconv::AstConv;
 use crate::check::coercion::CoerceMany;
+use crate::check::gather_locals::Declaration;
 use crate::check::method::MethodCallee;
 use crate::check::Expectation::*;
 use crate::check::TupleArgumentsFlag::*;
@@ -566,29 +567,33 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
-    /// Type check a `let` statement.
-    pub fn check_decl_local(&self, local: &'tcx hir::Local<'tcx>) {
+    pub(in super::super) fn check_decl(&self, decl: Declaration<'tcx>) {
         // Determine and write the type which we'll check the pattern against.
-        let ty = self.local_ty(local.span, local.hir_id).decl_ty;
-        self.write_ty(local.hir_id, ty);
+        let decl_ty = self.local_ty(decl.span, decl.hir_id).decl_ty;
+        self.write_ty(decl.hir_id, decl_ty);
 
         // Type check the initializer.
-        if let Some(ref init) = local.init {
-            let init_ty = self.check_decl_initializer(local.hir_id, local.pat, &init);
-            self.overwrite_local_ty_if_err(local.hir_id, local.pat, ty, init_ty);
+        if let Some(ref init) = decl.init {
+            let init_ty = self.check_decl_initializer(decl.hir_id, decl.pat, &init);
+            self.overwrite_local_ty_if_err(decl.hir_id, decl.pat, decl_ty, init_ty);
         }
 
         // Does the expected pattern type originate from an expression and what is the span?
-        let (origin_expr, ty_span) = match (local.ty, local.init) {
+        let (origin_expr, ty_span) = match (decl.ty, decl.init) {
             (Some(ty), _) => (false, Some(ty.span)), // Bias towards the explicit user type.
             (_, Some(init)) => (true, Some(init.span)), // No explicit type; so use the scrutinee.
             _ => (false, None), // We have `let $pat;`, so the expected type is unconstrained.
         };
 
         // Type check the pattern. Override if necessary to avoid knock-on errors.
-        self.check_pat_top(&local.pat, ty, ty_span, origin_expr);
-        let pat_ty = self.node_ty(local.pat.hir_id);
-        self.overwrite_local_ty_if_err(local.hir_id, local.pat, ty, pat_ty);
+        self.check_pat_top(&decl.pat, decl_ty, ty_span, origin_expr);
+        let pat_ty = self.node_ty(decl.pat.hir_id);
+        self.overwrite_local_ty_if_err(decl.hir_id, decl.pat, decl_ty, pat_ty);
+    }
+
+    /// Type check a `let` statement.
+    pub fn check_decl_local(&self, local: &'tcx hir::Local<'tcx>) {
+        self.check_decl(local.into());
     }
 
     pub fn check_stmt(&self, stmt: &'tcx hir::Stmt<'tcx>, is_last: bool) {
