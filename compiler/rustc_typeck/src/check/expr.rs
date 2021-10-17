@@ -1050,26 +1050,26 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn check_expr_let(&self, let_expr: &'tcx hir::Let<'tcx>) -> Ty<'tcx> {
         // overall similar operation to check_decl_local
+        let init = let_expr.init;
+
         let ty = self.local_ty(let_expr.span, let_expr.hir_id).decl_ty;
         self.write_ty(let_expr.hir_id, ty);
 
-        let hir::Let { pat, init: scrutinee, ty: explicit_ty, .. } = let_expr;
+        // main difference: we check if the expression is unreachable
+        self.warn_if_unreachable(init.hir_id, init.span, "block in `let` expression");
 
-        self.warn_if_unreachable(scrutinee.hir_id, scrutinee.span, "block in `let` expression");
-        let expr_ty = self.demand_scrutinee_type(
-            scrutinee,
-            pat.contains_explicit_ref_binding(),
-            false,
-            Some(ty),
-        );
+        let init_ty = self.check_decl_initializer(let_expr.hir_id, let_expr.pat, &init);
+        self.overwrite_local_ty_if_err(let_expr.hir_id, let_expr.pat, ty, init_ty);
 
         // Does the expected pattern type originate from an expression and what is the span?
-        let (origin_expr, ty_span) = match explicit_ty {
-            Some(ty) => (false, Some(ty.span)), // Bias towards the explicit user type.
-            _ => (true, Some(scrutinee.span)),  // No explicit type; so use the scrutinee.
+        let (origin_expr, ty_span) = match let_expr.ty {
+            Some(explicit) => (false, Some(explicit.span)), // Bias towards the explicit user type.
+            _ => (true, Some(init.span)), // No explicit type; so use the scrutinee.
         };
 
-        self.check_pat_top(pat, expr_ty, ty_span, origin_expr);
+        self.check_pat_top(let_expr.pat, init_ty, ty_span, origin_expr);
+        let pat_ty = self.node_ty(let_expr.pat.hir_id);
+        self.overwrite_local_ty_if_err(let_expr.hir_id, let_expr.pat, ty, pat_ty);
         self.tcx.types.bool
     }
 

@@ -538,16 +538,17 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     pub fn check_decl_initializer(
         &self,
-        local: &'tcx hir::Local<'tcx>,
+        hir_id: hir::HirId,
+        pat: &'tcx hir::Pat<'tcx>,
         init: &'tcx hir::Expr<'tcx>,
     ) -> Ty<'tcx> {
         // FIXME(tschottdorf): `contains_explicit_ref_binding()` must be removed
         // for #42640 (default match binding modes).
         //
         // See #44848.
-        let ref_bindings = local.pat.contains_explicit_ref_binding();
+        let ref_bindings = pat.contains_explicit_ref_binding();
 
-        let local_ty = self.local_ty(init.span, local.hir_id).revealed_ty;
+        let local_ty = self.local_ty(init.span, hir_id).revealed_ty;
         if let Some(m) = ref_bindings {
             // Somewhat subtle: if we have a `ref` binding in the pattern,
             // we want to avoid introducing coercions for the RHS. This is
@@ -573,8 +574,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         // Type check the initializer.
         if let Some(ref init) = local.init {
-            let init_ty = self.check_decl_initializer(local, &init);
-            self.overwrite_local_ty_if_err(local, ty, init_ty);
+            let init_ty = self.check_decl_initializer(local.hir_id, local.pat, &init);
+            self.overwrite_local_ty_if_err(local.hir_id, local.pat, ty, init_ty);
         }
 
         // Does the expected pattern type originate from an expression and what is the span?
@@ -587,7 +588,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // Type check the pattern. Override if necessary to avoid knock-on errors.
         self.check_pat_top(&local.pat, ty, ty_span, origin_expr);
         let pat_ty = self.node_ty(local.pat.hir_id);
-        self.overwrite_local_ty_if_err(local, ty, pat_ty);
+        self.overwrite_local_ty_if_err(local.hir_id, local.pat, ty, pat_ty);
     }
 
     pub fn check_stmt(&self, stmt: &'tcx hir::Stmt<'tcx>, is_last: bool) {
@@ -889,19 +890,20 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expr.span
     }
 
-    fn overwrite_local_ty_if_err(
+    pub(crate) fn overwrite_local_ty_if_err(
         &self,
-        local: &'tcx hir::Local<'tcx>,
+        hir_id: hir::HirId,
+        pat: &'tcx hir::Pat<'tcx>,
         decl_ty: Ty<'tcx>,
         ty: Ty<'tcx>,
     ) {
         if ty.references_error() {
             // Override the types everywhere with `err()` to avoid knock on errors.
-            self.write_ty(local.hir_id, ty);
-            self.write_ty(local.pat.hir_id, ty);
+            self.write_ty(hir_id, ty);
+            self.write_ty(pat.hir_id, ty);
             let local_ty = LocalTy { decl_ty, revealed_ty: ty };
-            self.locals.borrow_mut().insert(local.hir_id, local_ty);
-            self.locals.borrow_mut().insert(local.pat.hir_id, local_ty);
+            self.locals.borrow_mut().insert(hir_id, local_ty);
+            self.locals.borrow_mut().insert(pat.hir_id, local_ty);
         }
     }
 
