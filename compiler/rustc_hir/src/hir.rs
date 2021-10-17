@@ -1180,7 +1180,7 @@ pub struct Arm<'hir> {
 /// `let-else`, evaluating to a boolean. Typically the pattern is refutable.
 ///
 /// In an if-let, imagine it as `if (let <pat> = <expr>) { ... }`; in a let-else, it is part of the
-/// desugaring to if-let. Only if-let supports the type annotation at present.
+/// desugaring to if-let. Only let-else supports the type annotation at present.
 #[derive(Debug, HashStable_Generic)]
 pub struct Let<'hir> {
     pub hir_id: HirId,
