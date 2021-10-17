@@ -1,7 +1,9 @@
+// This had an ICE, see issue #89960
+
 #![feature(let_else)]
+#![deny(unused_variables)]
 
 fn main() {
-    // FIXME: more precise diagnostics
     let Some(ref mut meow) = Some(()) else { return };
-    //~^ ERROR: cannot borrow value as mutable, as `val` is not declared as mutable
+    //~^ ERROR unused variable: `meow`
 }
