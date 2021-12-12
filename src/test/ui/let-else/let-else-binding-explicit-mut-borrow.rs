@@ -4,7 +4,8 @@
 // Should it show a type error instead?
 
 fn main() {
-    let Some(n): &mut Option<i32> = &mut &Some(5i32) else { //~ ERROR cannot borrow data in a `&` reference as mutable
+    let Some(n): &mut Option<i32> = &mut &Some(5i32) else {
+        //~^ ERROR cannot borrow data in a `&` reference as mutable
         return
     };
     *n += 1;

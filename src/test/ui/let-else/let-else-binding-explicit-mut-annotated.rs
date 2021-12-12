@@ -13,8 +13,4 @@ fn main() {
     let Some(n): &mut Option<i32> = &&mut Some(5i32) else { return }; //~ ERROR mismatched types
     *n += 1;
     let _ = n;
-
-    let Some(n): &mut Option<i32> = &mut &mut Some(5i32) else { return }; // OK
-    *n += 1;
-    let _ = n;
 }
