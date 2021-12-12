@@ -1,7 +1,10 @@
+// check-pass
+//
 // Taken from https://github.com/rust-lang/rust/blob/6cc0a764e082d9c0abcf37a768d5889247ba13e2/compiler/rustc_typeck/src/check/_match.rs#L445-L462
 //
-// We attempt to `let Bar::Present(_) = foo else { ... }` where foo is meant to Deref/DerefMut to
-// Bar. This fails, you must add a type annotation like `let _: &mut Bar = _ else { ... }`
+// We attempt to `let Bar::Present(_): &mut Bar = foo else { ... }` where foo is meant to
+// Deref/DerefMut to Bar. You can do this with an irrefutable binding, so it should work with
+// let-else too.
 
 #![feature(let_else)]
 use std::ops::{Deref, DerefMut};
@@ -32,9 +35,8 @@ impl Bar {
     }
 }
 impl Foo {
-    // Try without the type annotation
-    fn set_bar_unannotated(&mut self, value: u32) {
-        let Bar::Present(z) = self else { //~ ERROR mismatched types
+    fn set_bar_annotated(&mut self, value: u32) {
+        let Bar::Present(z): &mut Bar = self else { // OK
             return;
         };
         *z = value;
@@ -43,12 +45,12 @@ impl Foo {
 
 fn main() {
     let mut foo = Foo(Bar::Present(1));
-    foo.set_bar_unannotated(54);
-    assert_eq!(foo.bar(), Some(54));
+    foo.set_bar_annotated(42);
+    assert_eq!(foo.bar(), Some(42));
     irrefutable::inner();
 }
 
-// The original, to show it fails for irrefutable let decls
+// The original, to show it works for irrefutable let decls
 mod irrefutable {
     use std::ops::{Deref, DerefMut};
     struct Foo(Bar);
@@ -65,9 +67,9 @@ mod irrefutable {
         }
     }
     fn foo(x: &mut Foo) {
-        let Bar(z) = x; //~ ERROR mismatched types
-        *z = 54;
-        assert_eq!((x.0).0, 54);
+        let Bar(z): &mut Bar = x; // OK
+        *z = 42;
+        assert_eq!((x.0).0, 42);
     }
     pub fn inner() {
         foo(&mut Foo(Bar(1)));
