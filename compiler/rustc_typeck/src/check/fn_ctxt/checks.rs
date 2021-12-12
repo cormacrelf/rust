@@ -896,7 +896,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expr.span
     }
 
-    pub(crate) fn overwrite_local_ty_if_err(
+    fn overwrite_local_ty_if_err(
         &self,
         hir_id: hir::HirId,
         pat: &'tcx hir::Pat<'tcx>,
