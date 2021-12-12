@@ -1,4 +1,4 @@
-// run-pass
+// check-pass
 // issue #89807
 
 #![feature(let_else)]
