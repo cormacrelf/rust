@@ -385,7 +385,7 @@ impl<'a, 'tcx> PrintVisitor<'a, 'tcx> {
                     self.qpath(qpath);
                 }
                 self.expr(field!(let_expr.init));
-            }
+            },
             ExprKind::Box(inner) => {
                 bind!(self, inner);
                 kind!("Box({inner})");

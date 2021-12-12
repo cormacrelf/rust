@@ -668,9 +668,7 @@ impl<'a, 'tcx> SpanlessHash<'a, 'tcx> {
                     }
                 }
             },
-            ExprKind::Let(Let {
-                pat, init, ty, ..
-            }) => {
+            ExprKind::Let(Let { pat, init, ty, .. }) => {
                 self.hash_expr(init);
                 if let Some(ty) = ty {
                     self.hash_ty(ty);

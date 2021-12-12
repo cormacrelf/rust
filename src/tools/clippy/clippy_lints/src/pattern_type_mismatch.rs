@@ -1,7 +1,6 @@
 use clippy_utils::diagnostics::span_lint_and_help;
 use rustc_hir::{
-    intravisit, Body, Expr, ExprKind, FnDecl, HirId, Let, LocalSource, Mutability, Pat, PatKind, Stmt,
-    StmtKind,
+    intravisit, Body, Expr, ExprKind, FnDecl, HirId, Let, LocalSource, Mutability, Pat, PatKind, Stmt, StmtKind,
 };
 use rustc_lint::{LateContext, LateLintPass, LintContext};
 use rustc_middle::lint::in_external_macro;
@@ -194,5 +193,3 @@ fn find_first_mismatch<'tcx>(cx: &LateContext<'tcx>, pat: &Pat<'_>) -> Option<(S
     });
     result
 }
-
-
