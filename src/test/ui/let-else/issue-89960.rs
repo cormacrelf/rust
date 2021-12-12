@@ -1,9 +1,9 @@
+// check-pass
 // This had an ICE, see issue #89960
 
 #![feature(let_else)]
-#![deny(unused_variables)]
 
 fn main() {
-    let Some(ref mut meow) = Some(()) else { return };
-    //~^ ERROR unused variable: `meow`
+    // (You can't use just `_` in any `ref`/`ref mut` pattern)
+    let Some(ref mut _a) = Some(()) else { return };
 }
